@@ -28,8 +28,8 @@ Checking the associated 'All entities appear in document' checkbox restricts
 query results to documents containing all selected entities  - unchecking 
 limits query results to documents containing at least one selected entity.  
 
-Entities are currently only available for the UN, FRUS, Clinton, and Briefing
-corpora. Therefore, selecting entity values limits query results to these 
+Entities are currently not available for the CIA, Worldbank, Cabinet, or CPDOC
+corpora. Therefore, selecting entity values excludes query results from these 
 corpora. We are actively working to extend our coverage to additional corpora 
 to enhance your search experience.
 
@@ -38,7 +38,7 @@ those of a skilled human annotator. If you do not find an entity in the
 dropdown corresponding to the person, place, or organization you wish to 
 search for, we suggest you enter the name into the full-text field."""
 entity_warning="""
-Specifying entities currently limits search to FRUS, UN, Clinton, and Briefing corpora.
+Specifying entities currently excludes results from CIA, Worldbank, Cabinet, and CPDOC corpora.
 """
 date_help="""
 Some documents do not include date metadata. You can expand your search
