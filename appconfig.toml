@@ -58,12 +58,14 @@ max_rows = 2000     # results must be <= to display detail records
 #
 docviewer_url="https://docviewer.history-lab.org"
 #
-sidebar_footer="""
+email_support="""
 Need assistance or have feedback to share? Don't hesitate to 
 [contact us](mailto:info@history-lab.org?subject=FOIArchive%20Search).
-
-Check out our [COVID-19 prototype](https://covid19-prototype.history-lab.org/).
 """
+# 
+collections_pg="https://lab.history.columbia.edu/content/collections"
+#
+intro_screencast="https://drive.google.com/file/d/1W0roGTVoXyy29o_CZep4sVE49RFvyEdp/view?usp=drive_link"
 # not used currently but should be
 # schema =
 # tsvector_col =

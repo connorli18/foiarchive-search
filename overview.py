@@ -4,15 +4,6 @@ c.page("Overview")    # must be 1st streamlit cmd or strange behavior ensues
 import sqlgen as sg
 import db
 
-"""
-The Freedom of Information Archive (FOIArchive) is a collection of documents
-obtained through the Freedom of Information Act (FOIA) and other public 
-records requests. The documents are primarily from the U.S. government but
-include materials from other countries. Its focus is on U.S. foreign policy
-and international relations. The collection is a work in progress, with new 
-documents added as they are obtained and processed. 
-"""
-
 # display metrics
 totals_sql = sg.query('totals', 'foiarchive.totals', None)
 totals_df = db.execute(totals_sql)
@@ -64,6 +55,3 @@ st.dataframe(cdf,
                 "pg_cnt": "Pages",
                 "word_cnt": "Words",
                 "topic_cnt": "Topics"})
-with open(c.config["corpora_description"], "r") as f:
-    st.markdown(f.read())
-c.footer()

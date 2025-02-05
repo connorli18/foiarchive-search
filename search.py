@@ -5,6 +5,17 @@ import datetime
 import sqlgen as sg
 import db
 
+if c.config["info_msg"]:
+    st.info(c.config["info_msg"]) 
+st.header("FOIArchive Search")
+f"""
+First time here? Learn more about our collections 
+[here]({c.config['collections_pg']}) and watch this
+brief [screencast]({c.config['intro_screencast']}) to see how to use the 
+search interface. More specific queries returning < {c.config['max_rows']}
+documents run faster and return metadata and text.
+"""
+
 # GUI search widgets
 # get values to populate values and ranges
 classification_lovs = db.get_lov("classifications", "classification")
@@ -103,8 +114,8 @@ if where_clause:
                                 },
                             }, use_container_width=True)  
         if metrics['doc_cnt'] > c.config["max_rows"]:
-            st.caption(f"**Note:** Queries of {c.config['max_rows']} \
-                    documents or less return downloadable metadata and text.")
+            st.markdown(f"##### Limit results to < {c.config['max_rows']} \
+                        for downloadable metadata and text.")
         else:
             data_table_sql = sg.query('data_table', c.config["table_name"], 
                                     where_clause)        
@@ -118,7 +129,5 @@ if where_clause:
                          column_config=c.COLUMN_CONFIGS)  
             st.write(f"Didn't get the expected results? \
                      [Let us know.]({c.search_results_email(query_display)})")      
-# Additional text for the sidebar footer
-c.footer()
-st.sidebar.write('You can find the previous version of the History Lab \
-                 search screen [here](http://history-lab.org/search).')            
+
+st.markdown(c.config["email_support"])

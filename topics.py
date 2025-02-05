@@ -7,7 +7,7 @@ import sqlgen as sg
 """
 Query the FOIArchive via topics derived by topic modeling. You can find
 more information about topic modeling 
-[here](http://history-lab.org/documentation).
+[here](https://lab.history.columbia.edu/content/documentation).
 """
 cdf = db.load_execute("corpora")
 tdf = db.load_execute("topics")
@@ -32,4 +32,3 @@ st.dataframe(topics_data_table_df,
              hide_index=True,
              column_order=['score'] + c.COLUMN_ORDER, 
              column_config=c.COLUMN_CONFIGS)
-c.footer() 

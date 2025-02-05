@@ -48,12 +48,6 @@ COLUMN_CONFIGS = {
                                            format="%.2f")
     }
 
-def sidebar_menu():
-
-    st.sidebar.page_link("Overview.py", label="Overview")
-    st.sidebar.page_link("pages/1_Search.py", label="Search")
-    st.sidebar.page_link("pages/2_Topics.py", label="Topics")
- 
 def footer():
     st.divider()
     st.subheader("About")
@@ -65,28 +59,14 @@ def footer():
     description.markdown("FOIArchive Search has been made possible in part by \
                          the [National Endowment for the Humanities](https://neh.gov):\
                          Democracy demands wisdom.")
-    st.sidebar.divider()
-    st.sidebar.markdown(config["sidebar_footer"])
 
-
-def page(page_name, display_menu=True):
+def page(page_name):
     st.set_page_config(page_title=f'{page_name} * HL-FOIA',
                        page_icon=config["favicon"],
-                       layout="wide",
                        menu_items={'Get Help': config["help_action"],
                                    'Report a bug': config["bug_action"],
                                    'About': f"### {config['gui_title']}\n" +
                                             f"{config['about_body']}"})
-    # sidebar logic
-    st.logo('static/hl-logo-with-text.png', 
-            link='http://history-lab.org')
-    st.sidebar.markdown("#### Freedom of Information Archive (FOIArchive)")
-    st.sidebar.divider()
-    if display_menu:
-        if config["info_msg"]:
-            st.info(config["info_msg"]) 
-        st.title(f'{page_name}')
-        sidebar_menu()
 
 # Returns mailto link for search results email report
 def search_results_email(query_display):
