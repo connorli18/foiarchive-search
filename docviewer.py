@@ -1,11 +1,16 @@
 import streamlit as st
 import configs as c
 doc_id = st.query_params.get('doc_id') 
-c.page(f"{doc_id}", display_menu=False)    # must be 1st streamlit cmd or strange behavior ensues
+c.page(f"{doc_id}")    # must be 1st streamlit cmd or strange behavior ensues
 import datetime
 import sqlgen as sg
 import db
+from collections import Counter
+import re
+from stopwords import get_stopwords
+import pandas as pd
 
+STOP_WORDS = set(get_stopwords("en"))
 
 def display_date(date):
     if date:
@@ -62,12 +67,29 @@ def display_cnt(type, cnt):
     if cnt:
         st.sidebar.markdown(f"### {type}: {cnt}")
 
+def display_common_words(doc):
+    words = re.findall(r'\b\w+\b', doc.body.lower())
+    # set arbitrary length for 5 to filter out short words
+    filtered_words = [word for word in words if word not in STOP_WORDS and len(word) >= 5]
+    word_counts = Counter(filtered_words).most_common(10)
+    df = pd.DataFrame(word_counts, columns=["Word", "Count"])
+    st.write("###### Most Common Words")
+    st.dataframe(df, hide_index=True, use_container_width=True, height=200)
+
 def display_doc(doc):
-    st.subheader(doc.title)
-    display_date(doc.authored)
-    display_source(doc.source)
-    display_body(doc)
-    display_citation(doc.title, doc.corpus_title, doc.doc_id)
+    col1, col2, col3 = st.columns([10, 1, 5])
+    with col1:
+        st.subheader(doc.title)
+        display_date(doc.authored)
+        display_source(doc.source)
+        display_body(doc)
+        display_citation(doc.title, doc.corpus_title, doc.doc_id)
+    
+    with col3:
+        st.subheader("Document NLP Analytics")
+        display_common_words(doc)
+
+    # Move sidebar content outside of the columns
     st.sidebar.markdown(f"### Original Classification: {doc.classification}") 
     display_entities(doc.doc_id)
     display_topics(doc.doc_id)
