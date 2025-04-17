@@ -3,3 +3,4 @@ __pycache__
 secrets.toml
 scratch.sql
 venv/
+config.ini

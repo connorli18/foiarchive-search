@@ -9,6 +9,8 @@ from collections import Counter
 import re
 from stopwords import get_stopwords
 import pandas as pd
+from textblob import TextBlob
+from prompt_llm import call_deepseek_model
 
 STOP_WORDS = set(get_stopwords("en"))
 
@@ -27,6 +29,14 @@ def display_citation(title, corpus_name, doc_id):
                     f"http://www.history-lab.org [Accessed: {date_str}]")
     st.sidebar.markdown(citation_str)
 
+def extract_year_references(doc):
+    matches = re.findall(r'\b(1[5-9]\d{2}|20[0-2]\d)\b', doc.body)
+    year_counts = Counter(matches).most_common()
+    if year_counts:
+        df = pd.DataFrame(year_counts, columns=["Year", "Mentions"])
+        st.write("###### Referenced Years")
+        st.dataframe(df, hide_index=True, use_container_width=True, height=150)
+
 def display_entities(doc_id):
     doc_entities_sql = sg.by_doc_id('doc_entities', doc_id)
     edf = db.execute(doc_entities_sql)
@@ -34,6 +44,31 @@ def display_entities(doc_id):
     if entity_list:
         st.sidebar.markdown("### Entities:")
         st.sidebar.write(entity_list)  
+
+def display_summary(doc):
+
+    message = f"""
+        Summarize the following text in a clear, objective, and concise way. Aim for a summary between **50 and 100 words**. Avoid including extraneous details, personal opinions, or stylistic flourishes.
+
+        Use plain, academic language and keep the summary to 50 words about. Just focus on the core ideas and key information.
+
+        Document:
+        {doc}
+    """
+
+    response = call_deepseek_model(message)
+    st.sidebar.markdown("### Document Summary:")
+    st.sidebar.write(response)
+
+
+
+def display_sentiment(doc):
+    blob = TextBlob(doc.body)
+    polarity = blob.sentiment.polarity
+    subjectivity = blob.sentiment.subjectivity
+    st.write("###### Document Sentiment")
+    st.write(f"* **Polarity:** {polarity:.2f}")
+    st.write(f"* **Subjectivity:** {subjectivity:.2f}")
 
 def display_topics(doc_id):
     doc_topics_sql = sg.by_doc_id('doc_topics', doc_id)
@@ -69,7 +104,6 @@ def display_cnt(type, cnt):
 
 def display_common_words(doc):
     words = re.findall(r'\b\w+\b', doc.body.lower())
-    # set arbitrary length for 5 to filter out short words
     filtered_words = [word for word in words if word not in STOP_WORDS and len(word) >= 5]
     word_counts = Counter(filtered_words).most_common(10)
     df = pd.DataFrame(word_counts, columns=["Word", "Count"])
@@ -88,6 +122,9 @@ def display_doc(doc):
     with col3:
         st.subheader("Document NLP Analytics")
         display_common_words(doc)
+        display_sentiment(doc)
+        extract_year_references(doc)
+
 
     # Move sidebar content outside of the columns
     st.sidebar.markdown(f"### Original Classification: {doc.classification}") 
@@ -95,8 +132,10 @@ def display_doc(doc):
     display_topics(doc.doc_id)
     display_cnt('Pages', doc.pg_cnt)
     display_cnt('Words', doc.word_cnt)
+    display_summary(doc.body)
 
 print(f'viewer|{datetime.datetime.now()}|{doc_id}', flush=True)    # logging
+
 if doc_id:
     doc_sql = sg.by_doc_id('docviewer', doc_id)
     doc_df = db.execute(doc_sql)
