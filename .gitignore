@@ -4,3 +4,4 @@ secrets.toml
 scratch.sql
 venv/
 config.ini
+similar_docs_idx/

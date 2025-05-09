@@ -11,8 +11,24 @@ from stopwords import get_stopwords
 import pandas as pd
 from textblob import TextBlob
 from prompt_llm import call_deepseek_model
+from similar_docs_idx.find_similar_docs import get_top_five_results
+
 
 STOP_WORDS = set(get_stopwords("en"))
+
+def display_similar_documents(doc):
+
+    results = get_top_five_results(doc)
+
+    if results:
+        st.sidebar.markdown("#### Similar Documents")
+
+        for similar_id in results:
+            url = f"https://docviewer.history-lab.org/?doc_id={similar_id}"
+            st.sidebar.markdown(f"- **{similar_id}** — [View it here]({url})", unsafe_allow_html=True)
+    else:
+        st.sidebar.markdown("No similar documents found.")
+
 
 def display_date(date):
     if date:
@@ -29,13 +45,16 @@ def display_citation(title, corpus_name, doc_id):
                     f"http://www.history-lab.org [Accessed: {date_str}]")
     st.sidebar.markdown(citation_str)
 
-def extract_year_references(doc):
+def display_year_references(doc):
     matches = re.findall(r'\b(1[5-9]\d{2}|20[0-2]\d)\b', doc.body)
     year_counts = Counter(matches).most_common()
     if year_counts:
         df = pd.DataFrame(year_counts, columns=["Year", "Mentions"])
         st.write("###### Referenced Years")
         st.dataframe(df, hide_index=True, use_container_width=True, height=150)
+    else:
+        st.write("###### Referenced Years")
+        st.write("No referenced years detected in the document.")
 
 def display_entities(doc_id):
     doc_entities_sql = sg.by_doc_id('doc_entities', doc_id)
@@ -123,7 +142,7 @@ def display_doc(doc):
         st.subheader("Document NLP Analytics")
         display_common_words(doc)
         display_sentiment(doc)
-        extract_year_references(doc)
+        display_year_references(doc)
 
 
     # Move sidebar content outside of the columns
@@ -133,6 +152,7 @@ def display_doc(doc):
     display_cnt('Pages', doc.pg_cnt)
     display_cnt('Words', doc.word_cnt)
     display_summary(doc.body)
+    display_similar_documents(doc)
 
 print(f'viewer|{datetime.datetime.now()}|{doc_id}', flush=True)    # logging
 
