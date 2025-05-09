@@ -12,6 +12,7 @@ import pandas as pd
 from textblob import TextBlob
 from prompt_llm import call_deepseek_model
 from similar_docs_idx.find_similar_docs import get_top_five_results
+import concurrent.futures
 
 
 STOP_WORDS = set(get_stopwords("en"))
@@ -25,7 +26,7 @@ def display_similar_documents(doc):
 
         for similar_id in results:
             url = f"https://docviewer.history-lab.org/?doc_id={similar_id}"
-            st.sidebar.markdown(f"- **{similar_id}** — [View it here]({url})", unsafe_allow_html=True)
+            st.sidebar.markdown(f"* [{similar_id}]({url})", unsafe_allow_html=True)
     else:
         st.sidebar.markdown("No similar documents found.")
 
@@ -64,21 +65,27 @@ def display_entities(doc_id):
         st.sidebar.markdown("### Entities:")
         st.sidebar.write(entity_list)  
 
-def display_summary(doc):
 
+def display_summary(doc_body):
     message = f"""
         Summarize the following text in a clear, objective, and concise way. Aim for a summary between **50 and 100 words**. Avoid including extraneous details, personal opinions, or stylistic flourishes.
 
         Use plain, academic language and keep the summary to 50 words about. Just focus on the core ideas and key information.
 
         Document:
-        {doc}
+        {doc_body}
     """
 
-    response = call_deepseek_model(message)
+    response = None
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(call_deepseek_model, message)
+        try:
+            response = future.result(timeout=10) 
+        except concurrent.futures.TimeoutError:
+            response = "Failed to generate"
+
     st.sidebar.markdown("### Document Summary:")
     st.sidebar.write(response)
-
 
 
 def display_sentiment(doc):
@@ -151,8 +158,8 @@ def display_doc(doc):
     display_topics(doc.doc_id)
     display_cnt('Pages', doc.pg_cnt)
     display_cnt('Words', doc.word_cnt)
-    display_summary(doc.body)
     display_similar_documents(doc)
+    display_summary(doc.body[0:5000])
 
 print(f'viewer|{datetime.datetime.now()}|{doc_id}', flush=True)    # logging
 
